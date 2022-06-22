@@ -37,7 +37,7 @@ class ui:
 
 def internetCheck():
     print(" [i] checking internet connection..." ,end="       ")
-    ping = subprocess.run(['ping www.github.com -c 2'],
+    ping = subprocess.run(['ping www.google.com -c 2'],
                             capture_output=True,
                             shell=True)
     print("output: " ,ping.stdout)
@@ -51,11 +51,14 @@ def internetCheck():
 
 
 def engine():
-    connection = internet()
+    connection = internetCheck()
     if (not connection):
         print(f"{ui.WARNING} [Failed]\n [Warning] no internet connection{ui.ENDC}") 
+        print(f"{ui.WARNING} [!] check internet connection and try again.{ui.ENDC}") 
+        controller()
     else:
         print(f"{ui.OKBLUE} [Passed]\n {ui.ENDC}")
+        
 
  
 #controller module that listen to user willing what wants to do
@@ -106,26 +109,6 @@ def controller():
     if selection == 0:
         print (ui.menu)
          
-
-def internet():
-    print(" [i] checking connection please wait...")
-    ping = subprocess.Popen(['ping https://www.github.com -c 2'],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            shell=True)
-    poll = ping.poll()
-    while (poll is None):
-        print ("pre-sleep line")
-        time.sleep(0.1)
-        
-    if poll == 0:
-        return True
-        print (f"{ui.OKBLUE} [i] Internet connection verified.{ui.ENDC}")
-    else:
-        return False
-        print(f"{ui.WARNING} [ERROR] Network error, Check your internet connection:  {ui.ENDC}")
-        control()
-
 
 def main():
     print(ui.banner)  # first time title bar:
