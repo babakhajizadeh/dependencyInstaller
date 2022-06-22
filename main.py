@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json
+import subprocess
 import time
 import platform
 from os import path
@@ -118,7 +118,5 @@ def main():
     while True:
         controller()  # keeps application running event loop simulation
         
-
-
 
 main()
