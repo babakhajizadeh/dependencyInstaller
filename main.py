@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import subprocess
 import json
 import time
 import platform
@@ -58,6 +57,10 @@ def engine():
         controller()
     else:
         print(f"{ui.OKBLUE} [Passed]\n {ui.ENDC}")
+    dependency_conf = open("dependency.conf")
+    commands = dependency_conf.readlines()
+    for eachCommand in commands:
+        print(eachCommand)
         
 
  
@@ -96,7 +99,7 @@ def controller():
             subprocess.call(('xdg-open', "dependency.conf"))  # opens file in linux
             print(" [i] waiting until file edit finishes...")
     if selection == 3:
-        config_check = path.exists("dependency_config.conf")
+        config_check = path.exists("dependency.conf")
         if (config_check is False): 
             print(f"{ui.WARNING} [Warning] Config file not find or wrong directory.{ui.ENDC}")
         elif selection == 3 and config_check:
