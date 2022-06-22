@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+
 import subprocess
 import time
 import platform
 from os import path
 import os
+
 os.chdir('..')
 configpath = os.getcwd()
 
@@ -37,11 +39,12 @@ class ui:
 def internetCheck():
     print(" [i] checking internet connection..." ,end="       ")
     ping = subprocess.run(['ping www.google.com -c 2'],
+                            text=True,
                             capture_output=True,
                             shell=True)
     print("output: " ,ping.stdout)
     print("return code ", ping.returncode)
-    return_code = ping.poll()
+    return_code = ping.check_returncode()
 
     if return_code == 0:
         return True
