@@ -11,10 +11,40 @@ __Still under development__
 ```sh
 chmod +x main.py
 ```
-### Usage
+### Usage:
 ```sh
-sudo ./main.py
+
+  [i] Instruction:
+      config file name must be: dependency.conf (case sensetive).
+      config file must contain encapsulated build commands in Stages in 
+      format shown below: (case sensitive).
+      Note: each stage starts with STAGE_START and ends to STAGE_END.
+      
+      ╔───────────dependency.conf───────────────╗
+      |STAGE_START:<config key>                 |
+      |comand                                   |
+      |comand                                   |
+      |...                                      |
+      |STAGE_END                                |
+      |                                         |
+      |STAGE_START:<config key>                 |
+      |comand                                   |
+      |comand                                   |
+      |...                                      |
+      |STAGE_END                                |
+      |.                                        |
+      |.                                        |
+      |.                                        |
+      ┖─────────────────────────────────────────┙
+      
+      Note: in case you are not willing want to clone the 
+            Dependency Installer to your source folder simply
+            change config file path
+         
+
+
 ```
+
 #### acknowledgement
 Development of this tool supervised by Mentor __Amirreza Ashouri. [AMP999](https://github.com/AMP999)__ 
 

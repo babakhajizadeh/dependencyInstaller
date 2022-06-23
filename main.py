@@ -35,29 +35,39 @@ class ui:
     menu = """
  [0] MENU:
  ==========
- [1] Change build path (defualt is: <cd ..>)
+ [1] Change config file path (defualt is: <cd ..>) 
  [2] Open config file
  [3] Install
  [4] Help
  [5] Exit
   """
     help = """
-  [i] instruction:
-      config file name must be: dependency.conf (case sensetive)
-      config file must contains stages in format shown below: (case sensitive)
+  [i] Instruction:
+      config file name must be: dependency.conf (case sensetive).
+      config file must contain encapsulated build commands in Stages in 
+      format shown below: (case sensitive).
+      Note: each stage starts with STAGE_START and ends to STAGE_END.
       
-      STAGE_START:<config key>  
-      comand
-      comand
-      ...
-      STAGE_END
+      ╔───────────dependency.conf───────────────╗
+      |STAGE_START:<config key>                 |
+      |comand                                   |
+      |comand                                   |
+      |...                                      |
+      |STAGE_END                                |
+      |                                         |
+      |STAGE_START:<config key>                 |
+      |comand                                   |
+      |comand                                   |
+      |...                                      |
+      |STAGE_END                                |
+      |.                                        |
+      |.                                        |
+      |.                                        |
+      ┖─────────────────────────────────────────┙
       
-      STAGE_START:<config key>
-      comand
-      comand
-      ...
-      STAGE_END
-      
+      Note: in case you are not willing want to clone the 
+            Dependency Installe to your source folder simply
+            change config file path
          
     """
 # Module for cheking internet
@@ -133,7 +143,7 @@ def engine():
   
 
     for s in  stagesList:
-        print("[debug] stage:",s.key ,"value:", s.value)
+        print("[debug] stage_key:",s.key ,"value:", s.value)
 
         
         
