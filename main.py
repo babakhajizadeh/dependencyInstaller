@@ -41,7 +41,23 @@ class ui:
  [5] Exit
   """
     help = """
-  [i] please read README documentaion for a detailed instruction.   
+  [i] instruction:
+      config file name must be: dependency.conf (case sensetive)
+      config file must contains stages in format shown below:
+      
+      STAGE_START:<config key>  
+      comand
+      comand
+      ...
+      STAGE_END
+      
+      STAGE_START:<config key>
+      comand
+      comand
+      ...
+      STAGE_END
+      
+         
     """
 # Module for cheking internet
 
