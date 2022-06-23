@@ -12,7 +12,6 @@ os.chdir('..')
 configpath = os.getcwd()
 
 
-
 class Stage:
     def __init__(self, key, commands):
         self.key = key
@@ -44,8 +43,8 @@ class ui:
     help = """
   [i] Instruction:
       config file name must be: dependency.conf (case sensetive).
-      config file must contain encapsulated build commands in Stages in 
-      format shown below: (case sensitive).
+      config file must contain encapsulated build commands in Stages whithin 
+      the format shown below: (case sensitive).
       Note: each stage starts with STAGE_START and ends to STAGE_END.
       
       ╔───────────dependency.conf───────────────╗
@@ -100,6 +99,19 @@ def internetCheck():
         return False
 
 
+
+def stageExe(stage_instance):
+    commands = stage_instance.value
+    for command in commands:
+        print(" [debug] key:", stage_instance.key , "command:", command)
+   # commandexe = subprocess.Popen([],
+    #                        stdout=subprocess.PIPE,
+     #                       stderr=subprocess.STDOUT,
+      #                      shell=True)
+    
+    
+    
+    
 # commands stager
 def engine():
     stage_key = 0
@@ -142,9 +154,8 @@ def engine():
             continue
   
 
-    for s in  stagesList:
-        print("[debug] stage_key:",s.key ,"value:", s.value)
-
+    for stage_instance in stagesList:
+        stageExe(stage_instance)
         
         
    
