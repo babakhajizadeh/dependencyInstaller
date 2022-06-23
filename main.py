@@ -19,7 +19,7 @@ class ui:
     
     banner = CLEAR + """
  ╔───────────────── Dependency Installer Engine v0.1──────────────────╗
- |  Dependency Installer Engine rpvides an automatic deployment and   |
+ |  Dependency Installer Engine provides an automatic deployment and  |
  |   Instalation of independently developed 3rd party applications.   |
  ┖────────────────────────────────────────────────────────────────────┙ """+ ENDC
     menu = """
@@ -37,14 +37,13 @@ class ui:
 # Module for cheking internet
 
 def internetCheck():
-    print(" [i] checking internet connection..." ,end="       ")
-    ping = subprocess.run(['ping www.google.com -c 2'],
-                            text=True,
-                            capture_output=True,
+    print(" [i] checking internet connection...",end="        ")
+    ping = subprocess.Popen(['ping 8.8.8.8 -c 2'],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
                             shell=True)
-    print("output: " ,ping.stdout)
-    print("return code ", ping.returncode)
-    return_code = ping.check_returncode()
+    ping.wait(timeout=3)
+    return_code = ping.poll()
 
     if return_code == 0:
         return True
@@ -59,11 +58,16 @@ def engine():
         print(f"{ui.WARNING} [!] check internet connection and try again.{ui.ENDC}") 
         controller()
     else:
-        print(f"{ui.OKBLUE} [Passed]\n {ui.ENDC}")
-    dependency_conf = open("dependency.conf")
-    commands = dependency_conf.readlines()
-    for eachCommand in commands:
-        print(eachCommand)
+        print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
+    try:
+        print(" [i] Reading config file...",end="                ")
+        dependency_conf = open("dependency.conf","r")
+    except:
+        print(f"{ui.WARNING} [Failed] {ui.ENDC}")
+        print(f"{ui.WARNING} [!] Can not read config file might be locked or corrupted. {ui.ENDC}")
+    else:
+        print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
+
         
 
  
@@ -102,10 +106,13 @@ def controller():
             subprocess.call(('xdg-open', "dependency.conf"))  # opens file in linux
             print(" [i] waiting until file edit finishes...")
     if selection == 3:
+        print(" [i] cheking if config file exist...",end="        ")
         config_check = path.exists("dependency.conf")
         if (config_check is False): 
+            print(f"{ui.WARNING} [Failed] {ui.ENDC}")
             print(f"{ui.WARNING} [Warning] Config file not find or wrong directory.{ui.ENDC}")
         elif selection == 3 and config_check:
+            print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
             engine() #does the main job
 
     if selection == 4:
