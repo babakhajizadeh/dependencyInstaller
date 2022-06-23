@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 
+from mimetypes import init
 import subprocess
 import time
 import platform
 from os import path
 import os
+import json
 
 os.chdir('..')
 configpath = os.getcwd()
+
+
+class Stage:
+    def __init__(self, key, commands):
+        self.key = key
+        self.value = commands
+        
 
 class ui:
     HEADER = '\033[95m'
@@ -42,7 +51,10 @@ def internetCheck():
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             shell=True)
-    ping.wait(timeout=3)
+    try:
+        ping.wait(timeout=3)
+    except:
+        return False
     return_code = ping.poll()
 
     if return_code == 0:
@@ -51,7 +63,12 @@ def internetCheck():
         return False
 
 
+# commands stager
 def engine():
+    stage_key = 0
+    reading_statge = False
+    eachstage = []
+    stagesList = []
     connection = internetCheck()
     if (not connection):
         print(f"{ui.WARNING} [Failed]\n [Warning] no internet connection{ui.ENDC}") 
@@ -65,9 +82,40 @@ def engine():
     except:
         print(f"{ui.WARNING} [Failed] {ui.ENDC}")
         print(f"{ui.WARNING} [!] Can not read config file might be locked or corrupted. {ui.ENDC}")
+        controller()
     else:
         print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
+    
+    lines = dependency_conf.readlines()  
+    for line in lines:
+        line = line.rstrip()
+        if line.find('STAGE_START') == 0:
+            stage_key_position = line.find("STAGE_START:")
+            buffer_mode = True
+            stage_key = (line[stage_key_position+12:]).strip()
+            print("[debug] stage_key", stage_key)
+            continue
 
+        if (buffer_mode):
+                eachstage.append(line) 
+                print("[Debug] buffer:", stage_key,eachstage)
+        if line.find("STAGE_END") == 0:
+            buffer_mode = False
+
+        if(not buffer_mode and len(eachstage)>0):
+            stage  = Stage
+            stage.key = stage_key
+            stage.value = eachstage
+            stagesList.append(stage)
+            continue
+  
+
+    for s in  stagesList:
+        print("stage-key",s.key)
+
+        
+        
+   
         
 
  
