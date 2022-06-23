@@ -103,7 +103,8 @@ def internetCheck():
 def stageExe(stage_instance):
     commands = stage_instance.value
     for command in commands:
-        print(" [debug] key:", stage_instance.key , "command:", command)
+        print(" [debug] stage:", stage_instance.key , "command:", command)
+        
    # commandexe = subprocess.Popen([],
     #                        stdout=subprocess.PIPE,
      #                       stderr=subprocess.STDOUT,
