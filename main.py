@@ -12,6 +12,7 @@ os.chdir('..')
 configpath = os.getcwd()
 
 
+
 class Stage:
     def __init__(self, key, commands):
         self.key = key
@@ -26,7 +27,7 @@ class ui:
     WARNING = '\033[93m'
     CLEAR ='\033c'
     
-    banner = CLEAR + """
+    banner = """
  ╔───────────────── Dependency Installer Engine v0.1──────────────────╗
  |  Dependency Installer Engine provides an automatic deployment and  |
  |   Instalation of independently developed 3rd party applications.   |
@@ -43,7 +44,7 @@ class ui:
     help = """
   [i] instruction:
       config file name must be: dependency.conf (case sensetive)
-      config file must contains stages in format shown below:
+      config file must contains stages in format shown below: (case sensitive)
       
       STAGE_START:<config key>  
       comand
@@ -60,6 +61,16 @@ class ui:
          
     """
 # Module for cheking internet
+
+def select():
+    try:
+        selection = int(input("\n [?] Select> ([0] for Menu): "))
+    except:
+        print(f"{ui.WARNING} [ERROR] Invalid type. try again. {ui.ENDC}") 
+        select() 
+    else:
+        return selection
+        
 
 def internetCheck():
     print(" [i] checking internet connection...",end="        ")
@@ -93,7 +104,7 @@ def engine():
     else:
         print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
     try:
-        print(" [i] Reading config file...",end="                ")
+        print(" [i] Reading config file...",end="                 ")
         dependency_conf = open("dependency.conf","r")
     except:
         print(f"{ui.WARNING} [Failed] {ui.ENDC}")
@@ -101,33 +112,28 @@ def engine():
         controller()
     else:
         print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
-    
     lines = dependency_conf.readlines()  
     for line in lines:
         line = line.rstrip()
-        if line.find('STAGE_START') == 0:
+        if line.find('STAGE_START') == 0:                        #detects a new satge
             stage_key_position = line.find("STAGE_START:")
             buffer_mode = True
             stage_key = (line[stage_key_position+12:]).strip()
-            print("[debug] stage_key", stage_key)
+            #print("[debug] stage_key", stage_key)
             continue
-
-        if (buffer_mode):
-                eachstage.append(line) 
-                print("[Debug] buffer:", stage_key,eachstage)
         if line.find("STAGE_END") == 0:
-            buffer_mode = False
-
+            buffer_mode = False        
+        if (buffer_mode):                                         #read from stage
+                eachstage.append(line) 
+                #print("[Debug] buffer:", stage_key,eachstage)
         if(not buffer_mode and len(eachstage)>0):
-            stage  = Stage
-            stage.key = stage_key
-            stage.value = eachstage
-            stagesList.append(stage)
+            stagesList.append(Stage(stage_key,eachstage))
+            eachstage = []
             continue
   
 
     for s in  stagesList:
-        print("stage-key",s.key)
+        print("[debug] stage:",s.key ,"value:", s.value)
 
         
         
@@ -137,13 +143,7 @@ def engine():
  
 #controller module that listen to user willing what wants to do
 def controller():
-    print(ui.menu)
-    global configpath
-    try:
-        selection = int(input(" [?] Select> ([0] for Menu): "))
-    except:
-        print(f"{ui.WARNING} [ERROR] Invalid type. try again. {ui.ENDC}") 
-        controller()
+    selection = select()
     if selection == 1:
         print (f" [i] Current work directory for build is{ui.OKBLUE}:\n    " , configpath)
         print(f"{ui.ENDC}")
@@ -188,7 +188,9 @@ def controller():
          
 
 def main():
-    print(ui.banner)  # first time title bar:
+    print (ui.CLEAR) #cleans screen
+    print (ui.banner)
+    print (ui.menu)
     while True:
         controller()  # keeps application running event loop simulation
         
