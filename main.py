@@ -223,16 +223,22 @@ def controller():
         prompt = input(" [?] would you like to modify? (y/n):")
         if (prompt == 'Y' or prompt == 'y'):
             print (" [?] Input new build path address:", end=" ")
-            temp_configpath = input("(e.g: C:/mylib/source):")
+            temp_configpath = input("(POSIX: ~/ is not supported)(e.g: C:/mylib/source):")
             if len(temp_configpath) < 1:
                 print(f"{ui.WARNING} [!] Input address is too short.{ui.ENDC}")
             else:
                 print(" [i] New directory as buildpath is set to:")
                 configpath = temp_configpath
                 print("    ",configpath)
+                try:
+                    os.chdir(configpath)
+                except:
+                    print(f"{ui.WARNING} [!] No such file or directory: ",configpath , f"{ui.ENDC}")
+                    configpath = os.getcwd()
         elif(prompt == 'N' or prompt == 'n'):
             print(" [i] build dir not changed") 
-        
+        else: 
+            print (f"{ui.WARNING} [!] Input invalid.{ui.ENDC}")
     if selection == 2:
         config_check = path.exists("dependency.conf")
         if (config_check is False):
@@ -244,6 +250,7 @@ def controller():
             print(" [i] waiting until file edit finishes...")
     if selection == 3:
         print(" [i] cheking if config file exist...",end="        ")
+        
         config_check = path.exists("dependency.conf")
         if (config_check is False): 
             print(f"{ui.WARNING} [Failed] {ui.ENDC}")
