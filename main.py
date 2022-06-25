@@ -2,6 +2,7 @@
 
 from mimetypes import init
 import subprocess
+from sys import stdout
 import time
 import platform
 from os import path
@@ -17,6 +18,8 @@ class Stage:
         self.key = key                   # key is the stage key
         self.value = commands            # value is stagebody which is a list data strcture
 class ui:
+    BOLD = '\033[1m'
+    RED = '\033[91m'
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     FAIL = '\033[91m'
@@ -38,6 +41,12 @@ class ui:
  [4] Help
  [5] Exit
   """
+    failureprompt ="""
+     what are you willing to do:
+     [1] Continue to execute next stage.
+     [2] Break the operation. 
+     [3] Exit.  
+    """
     help = """
   [i] Instruction:
       config file name must be: dependency.conf (case sensetive).
@@ -71,23 +80,25 @@ class ui:
 
 
 
-
-def select():
+#this method handles user input (selection of options from the menu)
+def select():                             
     try:
         selection = int(input("\n [?] Select> ([0] for Menu): "))
     except:
-        print(f"{ui.WARNING} [ERROR] Invalid type. try again. {ui.ENDC}") 
+        print(f"{ui.WARNING} [!] Invalid type. try again. {ui.ENDC}") 
         select() 
     else:
         return selection
         
-
+#this method checks for internet connection using system ping program
 def internetCheck():
     print(" [i] checking internet connection...",end="        ")
     ping = subprocess.Popen(['ping 8.8.8.8 -c 2'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             shell=True)
+    
+
     try:
         ping.wait(timeout=3)
     except:
@@ -100,24 +111,40 @@ def internetCheck():
         return False
 
 
-
+# this method executes commands whithn an stage
 def stageExe(stage_instance):
-    commands = stage_instance.value
+    stage_status = True                              # if it executed successfully will report true, 
+    commands = stage_instance.value                  # any error will change it false
     for command in commands:
-        print(" [debug] stage:", stage_instance.key , "command:", command)
+        print(f"{ui.RED} [Execute]{ui.ENDC} stage:", stage_instance.key , f"command:{ui.BOLD}", command, f"{ui.ENDC}")
         
-   # commandexe = subprocess.Popen([],
-    #                        stdout=subprocess.PIPE,
-     #                       stderr=subprocess.STDOUT,
-      #                      shell=True)
-    
-    
+        commandexe = subprocess.Popen([str(command)],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                shell=True)
+
+        while True:
+            output = commandexe.stdout.readline()
+            if output == '' or commandexe.poll() is not None:
+                break
+            if output:
+                output = (str(output))[1:]
+                print(f" [OS] stdout report:{ui.HEADER}" ,output, f" {ui.ENDC}")
+        return_code = commandexe.poll()
+        if (return_code == 0):
+            print(f"{ui.OKBLUE} [OS] command succeed, return code 0.{ui.ENDC}")
+        else:
+            print(f"{ui.WARNING} [OS] Command Failed, return code:{ui.ENDC}", return_code)
+            stage_status=False
+    return stage_status
+
+                
+
     
     
 # commands stager
 def engine():
     stage_key = 0
-    reading_statge = False
     stagebody = []
     stagesList = []
     connection = internetCheck()
@@ -136,12 +163,13 @@ def engine():
         controller()
     else:
         print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
-    
-    #above control conditions verifies availablity of config file
         
+    #above control conditions verifies availablity of config file
     lines = dependency_conf.readlines()  
-    for line in lines:
+    for line in lines :
         line = line.rstrip()
+        if line == "" or line[0] == "#":                                           # skips empty lines
+            continue
         if line.find('STAGE_START') == 0:                        # detects start of new satge from config file by reading 
             stage_key_position = line.find("STAGE_START:")       # specifc "STAGE_START identifier in config file"
             buffer_mode = True
@@ -150,7 +178,7 @@ def engine():
             continue
         if line.find("STAGE_END") == 0:                          # detecs end of stage by "STAGE_END" identifier and stops buffering commands
             buffer_mode = False        
-        if (buffer_mode):                                        # reads commands from buffer whithin the stage body 
+        if (buffer_mode ):                                       # reads commands from buffer whithin the stage body 
                 stagebody.append(line)                           # into a list data structure named as "stagebody"
                 #print("[Debug] buffer:", stage_key,stagebody)
         if(not buffer_mode and len(stagebody)>0):
@@ -158,11 +186,29 @@ def engine():
             stagebody = []                                       # each stage class object is made of several commands knwon as stage "body" 
             continue                                             # and a refrence key, each body has a unique key
   
-
     for stage_instance in stagesList:                            # reads every single stage class objects from the stage list
-        stageExe(stage_instance)                                 # and sends it to stageexe() which takes responsiblity is executing a stage 
-        
-        
+        stage_status = stageExe(stage_instance)                                 # and sends it to stageexe() which takes responsiblity is executing a stage 
+        if stage_status:
+            print(f"{ui.OKBLUE} [i] stage:", stage_instance.key, 
+                  f"executed with no Errors.{ui.ENDC}")
+        else:
+            print(f"{ui.WARNING} [i] Stage Nom.: ", stage_instance.key, 
+                  f" ,execution resulted in atleast one Error.{ui.ENDC}",sep="")
+            print(ui.failureprompt)
+            selection =select()
+            if selection == 0:
+                print(ui.failureprompt)
+                select()
+            elif selection == 1:
+                continue
+            elif selection == 2:
+                print (ui.menu)
+                controller();
+            elif selection == 3:
+                exit()  
+            else:
+                print(f"{ui.WARNING} [!] Invalid type. try again. {ui.ENDC}")
+                select()
    
         
 
