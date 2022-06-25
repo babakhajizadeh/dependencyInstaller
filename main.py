@@ -159,8 +159,8 @@ def engine():
             continue                                             # and a refrence key, each body has a unique key
   
 
-    for stage_instance in stagesList:                            # reads single stage class object from the stage list
-        stageExe(stage_instance)
+    for stage_instance in stagesList:                            # reads every single stage class objects from the stage list
+        stageExe(stage_instance)                                 # and sends it to stageexe() which takes responsiblity is executing a stage 
         
         
    
