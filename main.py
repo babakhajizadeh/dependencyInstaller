@@ -11,13 +11,11 @@ import json
 os.chdir('..')
 configpath = os.getcwd()
 
-
+#stage class is blueprint to stage object which is consist of stage body List (commands) and a key 
 class Stage:
-    def __init__(self, key, commands):
-        self.key = key
-        self.value = commands
-        
-
+    def __init__(self, key, commands):   # commands known as stagebody list and key is the stage key
+        self.key = key                   # key is the stage key
+        self.value = commands            # value is stagebody which is a list data strcture
 class ui:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -71,6 +69,9 @@ class ui:
     """
 # Module for cheking internet
 
+
+
+
 def select():
     try:
         selection = int(input("\n [?] Select> ([0] for Menu): "))
@@ -117,7 +118,7 @@ def stageExe(stage_instance):
 def engine():
     stage_key = 0
     reading_statge = False
-    eachstage = []
+    stagebody = []
     stagesList = []
     connection = internetCheck()
     if (not connection):
@@ -135,27 +136,30 @@ def engine():
         controller()
     else:
         print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
+    
+    #above control conditions verifies availablity of config file
+        
     lines = dependency_conf.readlines()  
     for line in lines:
         line = line.rstrip()
-        if line.find('STAGE_START') == 0:                        #detects a new satge
-            stage_key_position = line.find("STAGE_START:")
+        if line.find('STAGE_START') == 0:                        # detects start of new satge from config file by reading 
+            stage_key_position = line.find("STAGE_START:")       # specifc "STAGE_START identifier in config file"
             buffer_mode = True
-            stage_key = (line[stage_key_position+12:]).strip()
+            stage_key = (line[stage_key_position+12:]).strip()   # reads the stage key
             #print("[debug] stage_key", stage_key)
             continue
-        if line.find("STAGE_END") == 0:
+        if line.find("STAGE_END") == 0:                          # detecs end of stage by "STAGE_END" identifier and stops buffering commands
             buffer_mode = False        
-        if (buffer_mode):                                         #read from stage
-                eachstage.append(line) 
-                #print("[Debug] buffer:", stage_key,eachstage)
-        if(not buffer_mode and len(eachstage)>0):
-            stagesList.append(Stage(stage_key,eachstage))
-            eachstage = []
-            continue
+        if (buffer_mode):                                        # reads commands from buffer whithin the stage body 
+                stagebody.append(line)                           # into a list data structure named as "stagebody"
+                #print("[Debug] buffer:", stage_key,stagebody)
+        if(not buffer_mode and len(stagebody)>0):
+            stagesList.append(Stage(stage_key,stagebody))        # creates a stage list consisting of stage class object(body,key)
+            stagebody = []                                       # each stage class object is made of several commands knwon as stage "body" 
+            continue                                             # and a refrence key, each body has a unique key
   
 
-    for stage_instance in stagesList:
+    for stage_instance in stagesList:                            # reads single stage class object from the stage list
         stageExe(stage_instance)
         
         
@@ -214,7 +218,7 @@ def main():
     print (ui.banner)
     print (ui.menu)
     while True:
-        controller()  # keeps application running event loop simulation
+        controller()  # keeps application running, sort of event loop simulation
         
 
 main()
