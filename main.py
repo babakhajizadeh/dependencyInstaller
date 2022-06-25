@@ -215,6 +215,7 @@ def engine():
  
 #controller module that listen to user willing what wants to do
 def controller():
+    global configpath
     selection = select()
     if selection == 1:
         print (f" [i] Current work directory for build is{ui.OKBLUE}:\n    " , configpath)
