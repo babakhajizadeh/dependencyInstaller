@@ -2,7 +2,7 @@
 
 from mimetypes import init
 import subprocess
-from sys import stdout
+import sys
 import time
 import platform
 from os import path
