@@ -11,6 +11,7 @@ import json
 
 os.chdir('..')
 configpath = os.getcwd()
+buildall = False
 
 #stage class is blueprint to stage object which is consist of stage body List (commands) and a key 
 class Stage:
@@ -47,10 +48,15 @@ class ui:
      [2] Break the operation. 
      [3] Exit.  
     """
+    buildallprompt = """
+  [?] Build all stages?
+      [1] Continue/build and prompt each time a stage done.
+      [2] execute all stages untill finish or raise of an Error.
+    """
     help = """
   [i] Instruction:
       config file name must be: dependency.conf (case sensetive).
-      config file must contain encapsulated build commands in Stages whithin 
+      config file must contain encapsulated build commands in 'Stages' whithin 
       the format shown below: (case sensitive).
       Note: each stage starts with STAGE_START and ends to STAGE_END.
       
@@ -144,6 +150,7 @@ def stageExe(stage_instance):
     
 # commands stager
 def engine():
+    global buildall
     stage_key = 0
     stagebody = []
     stagesList = []
@@ -166,18 +173,31 @@ def engine():
         
     #above control conditions verifies availablity of config file
     lines = dependency_conf.readlines()  
+    expect_STAGE_END_identifier = False
+    expect_STAGE_START_identofier = False
     for line in lines :
         line = line.rstrip()
         if line == "" or line[0] == "#":                                           # skips empty lines
             continue
-        if line.find('STAGE_START') == 0:                        # detects start of new satge from config file by reading 
-            stage_key_position = line.find("STAGE_START:")       # specifc "STAGE_START identifier in config file"
+        if line.find('STAGE_START') == 0 and not expect_STAGE_END_identifier:      # detects start of new satge from config file by reading
+            expect_STAGE_END_identifier = True 
+            expect_STAGE_START_identofier = False
+            stage_key_position = line.find("STAGE_START:")                         # specifc "STAGE_START identifier in config file"
             buffer_mode = True
-            stage_key = (line[stage_key_position+12:]).strip()   # reads the stage key
+            stage_key = (line[stage_key_position+12:]).strip()                     # reads the stage key
             #print("[debug] stage_key", stage_key)
             continue
-        if line.find("STAGE_END") == 0:                          # detecs end of stage by "STAGE_END" identifier and stops buffering commands
-            buffer_mode = False        
+        elif line.find('STAGE_START') == 0 and expect_STAGE_END_identifier:
+            print(f"{ui.RED} [Fatal] Expected STAGE_END identifier, but missing.\n{ui.ENDC}")
+            exit() 
+            
+        if line.find("STAGE_END") == 0 and not expect_STAGE_START_identofier:      # detecs end of stage by "STAGE_END" identifier and stops buffering commands
+            expect_STAGE_END_identifier = False
+            expect_STAGE_START_identofier = True
+            buffer_mode = False 
+        elif line.find('STAGE_END') == 0 and expect_STAGE_START_identofier:
+            print(f"{ui.RED} [Fatal] Expected STAGE_START identifier, but missing.\n{ui.ENDC}")      
+            exit() 
         if (buffer_mode ):                                       # reads commands from buffer whithin the stage body 
                 stagebody.append(line)                           # into a list data structure named as "stagebody"
                 #print("[Debug] buffer:", stage_key,stagebody)
@@ -185,12 +205,25 @@ def engine():
             stagesList.append(Stage(stage_key,stagebody))        # creates a stage list consisting of stage class object(body,key)
             stagebody = []                                       # each stage class object is made of several commands knwon as stage "body" 
             continue                                             # and a refrence key, each body has a unique key
+   
   
     for stage_instance in stagesList:                            # reads every single stage class objects from the stage list
         stage_status = stageExe(stage_instance)                                 # and sends it to stageexe() which takes responsiblity is executing a stage 
         if stage_status:
             print(f"{ui.OKBLUE} [i] stage:", stage_instance.key, 
                   f"executed with no Errors.{ui.ENDC}")
+            if not buildall:
+                print(ui.buildallprompt)
+                selection = select()
+                if selection == 1:
+                    buildall =  False
+                elif selection == 2:
+                    buildall = True
+                else:
+                    while buildall == 0:
+                        print(ui.buildallprompt)
+                        select()
+                
         else:
             print(f"{ui.WARNING} [i] Stage Nom.: ", stage_instance.key, 
                   f" ,execution resulted in atleast one Error.{ui.ENDC}",sep="")
@@ -209,13 +242,18 @@ def engine():
             else:
                 print(f"{ui.WARNING} [!] Invalid type. try again. {ui.ENDC}")
                 select()
-   
-        
-
+    if stage_status:
+        print(f"{ui.OKBLUE} [i] Job Finished. All stages done successfully. {ui.ENDC}")
+        dependency_conf.close()
+    else:
+        print(f"{ui.WARNING} [!] Job Finished. Encountered atleast one error. {ui.ENDC}")
+        dependency_conf.close()
+     
  
 #controller module that listen to user willing what wants to do
 def controller():
     global configpath
+    global buildall
     selection = select()
     if selection == 1:
         print (f" [i] Current work directory for build is{ui.OKBLUE}:\n    " , configpath)
@@ -236,11 +274,11 @@ def controller():
                     print(f"{ui.WARNING} [!] No such file or directory: ",configpath , f"{ui.ENDC}")
                     configpath = os.getcwd()
         elif(prompt == 'N' or prompt == 'n'):
-            print(" [i] build dir not changed") 
+            print(" [i] Build directory has not changed.") 
         else: 
             print (f"{ui.WARNING} [!] Input invalid.{ui.ENDC}")
     if selection == 2:
-        config_check = path.exists("dependency.conf")
+        config_check = path.exists("dependency.conf")            # returns True if config file found
         if (config_check is False):
             print(f"{ui.WARNING} [Warning] Config file not find or wrong directory.{ui.ENDC}")
         elif platform.system() == 'Windows':    # Windows
@@ -257,7 +295,19 @@ def controller():
             print(f"{ui.WARNING} [Warning] Config file not find or wrong directory.{ui.ENDC}")
         elif selection == 3 and config_check:
             print(f"{ui.OKBLUE} [Passed] {ui.ENDC}")
+            print(ui.buildallprompt)
+            selection = select()
+            if selection == 1:
+                buildall =  False
+            elif selection == 2:
+                buildall = True
+            else:
+                while buildall == 0:
+                    print(ui.buildallprompt)
+                    select()
+                    
             engine() #does the main job
+            
 
     if selection == 4:
         print (ui.help)
