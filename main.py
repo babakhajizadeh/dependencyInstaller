@@ -4,11 +4,10 @@ import ctypes
 from mimetypes import init
 import subprocess
 import sys
-import time
 import platform
 from os import path
 import os
-import json
+import socket
 
 os.chdir('..')
 configpath = os.getcwd()
@@ -103,21 +102,12 @@ def select():
 #this method checks for internet connection using system ping program
 def internetCheck():
     print(" [i] checking internet connection...",end="        ")
-    ping = subprocess.Popen('ping 8.8.8.8 -c 2',
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            shell=True)
-    
-
     try:
-        ping.wait(timeout=3)
-    except:
-        return False
-    return_code = ping.poll()
-
-    if return_code == 0:
+        # connect to the host -- tells us if the host is actually
+        # reachable 
+        socket.create_connection(("8.8.8.8", 53))
         return True
-    else:
+    except OSError:
         return False
 
 
@@ -159,6 +149,7 @@ def engine():
     stagebody = []
     stagesList = []
     connection = internetCheck()
+    
     if (not connection):
         print(f"{ui.WARNING} [Failed]\n [Warning] no internet connection{ui.ENDC}") 
         print(f"{ui.WARNING} [!] check internet connection and try again.{ui.ENDC}") 
