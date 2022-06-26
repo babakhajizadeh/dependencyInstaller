@@ -103,7 +103,7 @@ def select():
 #this method checks for internet connection using system ping program
 def internetCheck():
     print(" [i] checking internet connection...",end="        ")
-    ping = subprocess.Popen(['ping 8.8.8.8 -c 2'],
+    ping = subprocess.Popen('ping 8.8.8.8 -c 2',
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             shell=True)
@@ -128,7 +128,7 @@ def stageExe(stage_instance):
     for command in commands:
         print(f"{ui.RED} [Execute]{ui.ENDC} stage:", stage_instance.key , f"command:{ui.BOLD}", command, f"{ui.ENDC}")
         
-        commandexe = subprocess.Popen([str(command)],
+        commandexe = subprocess.Popen(str(command),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 shell=True)
