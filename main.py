@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ctypes
 from mimetypes import init
 import subprocess
 import sys
@@ -12,6 +13,9 @@ import json
 os.chdir('..')
 configpath = os.getcwd()
 buildall = False
+
+
+
 
 #stage class is blueprint to stage object which is consist of stage body List (commands) and a key 
 class Stage:
@@ -318,6 +322,11 @@ def controller():
          
 
 def main():
+    currentPlatform = platform.system()
+    if currentPlatform == "Windows":
+        kernel32 = ctypes.windll.kernel32
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+        
     print (ui.CLEAR) #cleans screen
     print (ui.banner)
     print (ui.menu)
